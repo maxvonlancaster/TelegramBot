@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using System;
+using TelegramBot.Services;
 
 namespace TelegramBot
 {
@@ -15,6 +16,10 @@ namespace TelegramBot
         public static void ConfigureServices()
         {
             var builder = new ContainerBuilder();
+
+            builder.RegisterType<MessagingService>()
+                .As<IStartable>()
+                .SingleInstance();
 
             // Configure services
             Container = builder.Build();
