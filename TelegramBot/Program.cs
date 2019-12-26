@@ -23,6 +23,7 @@ namespace TelegramBot
 
             // Configure services
             Container = builder.Build();
+            Console.ReadLine();
         }
     }
 }
