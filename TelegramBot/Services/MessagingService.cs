@@ -15,6 +15,7 @@ using Syncfusion.OfficeChartToImageConverter;
 using Syncfusion.Drawing;
 using Telegram.Bot.Types.InputFiles;
 using Syncfusion.PresentationRenderer;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Services
 {
@@ -60,9 +61,14 @@ namespace TelegramBot.Services
                     pptxDoc.PresentationRenderer = new PresentationRenderer();
                     Stream image = pptxDoc.Slides[0].ConvertToImage(ExportImageFormat.Png);
 
+                    InlineKeyboardButton button = new InlineKeyboardButton();
+                    button.CallbackData = $"{senderId},: {i},: {0}";
+                    button.Text = "Next page";
+
+                    InlineKeyboardMarkup markup = new InlineKeyboardMarkup(button);
+
                     InputOnlineFile file = new InputOnlineFile(image);
-                    Bot.SendPhotoAsync(senderId, file);
-                    
+                    Bot.SendPhotoAsync(senderId, file, replyMarkup: markup);
                 }
             }
         }
