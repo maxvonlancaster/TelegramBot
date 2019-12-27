@@ -16,6 +16,7 @@ using Syncfusion.Drawing;
 using Telegram.Bot.Types.InputFiles;
 using Syncfusion.PresentationRenderer;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Args;
 
 namespace TelegramBot.Services
 {
@@ -24,15 +25,21 @@ namespace TelegramBot.Services
         private static readonly TelegramBotClient Bot = 
             new TelegramBotClient("955563107:AAFBR8hVPedVsmCAy9JJ4C_DZTlzbDxjJzQ");
 
-        //public static SlideCollection slides;
-
-        public static int presntationId = -1;
+        public static List<IPresentation> presentations = new List<IPresentation>();
 
         public void Start()
         {
             var cts = new CancellationTokenSource();
             var stoppingToken = cts.Token;
             Bot.OnMessage += Bot_OnMessage;
+            Bot.OnCallbackQuery += Bot_OnCallback;
+
+            for (int i = 0; i < Files.FileNames.Length; i++) 
+            {
+                IPresentation pptxDoc = Presentation.Open("../../../Files/" + Files.FileNames[i]);
+                pptxDoc.PresentationRenderer = new PresentationRenderer();
+                presentations.Add(pptxDoc);
+            }
 
             Task.Run(() => {
                 Bot.StartReceiving(cancellationToken: stoppingToken);
@@ -43,6 +50,7 @@ namespace TelegramBot.Services
                     Bot.GetUpdatesAsync();
                 }
             });
+
             //ComponentInfo.SetLicense("FREE-LIMITED-KEY");
         }
 
@@ -56,23 +64,41 @@ namespace TelegramBot.Services
                 int i;
                 if (int.TryParse(text, out i)) 
                 {
-                    presntationId = i;
-                    IPresentation pptxDoc = Presentation.Open("../../../Files/" + Files.FileNames[i]);
-                    pptxDoc.PresentationRenderer = new PresentationRenderer();
-                    Stream image = pptxDoc.Slides[0].ConvertToImage(ExportImageFormat.Png);
+                    Stream image = presentations[i].Slides[0].ConvertToImage(ExportImageFormat.Png);
 
                     InlineKeyboardButton button = new InlineKeyboardButton();
-                    button.CallbackData = $"{senderId},: {i},: {0}";
+                    button.CallbackData = $"{senderId}:{i}:{0}";
                     button.Text = "Next page";
 
                     InlineKeyboardMarkup markup = new InlineKeyboardMarkup(button);
 
                     InputOnlineFile file = new InputOnlineFile(image);
+
                     Bot.SendPhotoAsync(senderId, file, replyMarkup: markup);
                 }
             }
         }
 
+        private void Bot_OnCallback(object sender, CallbackQueryEventArgs e)
+        {
+            string[] data = e.CallbackQuery.Data.Split(':');
+            int presentationId;
+            int slideId;
+            if (int.TryParse(data[1], out presentationId) && int.TryParse(data[2], out slideId)) 
+            {
+                slideId++;
+                Stream image = presentations[presentationId].Slides[slideId].ConvertToImage(ExportImageFormat.Png);
 
+                InlineKeyboardButton button = new InlineKeyboardButton();
+                button.CallbackData = $"{data[0]}:{presentationId}:{slideId}";
+                button.Text = "Next page";
+
+                InlineKeyboardMarkup markup = new InlineKeyboardMarkup(button);
+
+                InputOnlineFile file = new InputOnlineFile(image);
+
+                Bot.SendPhotoAsync(data[0], file, replyMarkup: markup);
+            }
+        }
     }
 }

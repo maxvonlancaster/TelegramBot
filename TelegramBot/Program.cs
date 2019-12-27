@@ -21,9 +21,15 @@ namespace TelegramBot
                 .As<IStartable>()
                 .SingleInstance();
 
+
             // Configure services
             Container = builder.Build();
             Console.ReadLine();
         }
+
+        // TODO: 1 -> retrieve appsettings.json
+        // TODO: 2 -> 
+        // TODO: 3 -> 
+
     }
 }

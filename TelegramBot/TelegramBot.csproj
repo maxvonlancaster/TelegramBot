@@ -19,4 +19,10 @@
     <Folder Include="Files\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Files\presentation_one.pptx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

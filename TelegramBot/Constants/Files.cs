@@ -6,6 +6,9 @@ namespace TelegramBot.Constants
 {
     public class Files
     {
-        public static string[] FileNames = { "presentation_one.pptx" };
+        public static string[] FileNames = 
+        { 
+            "presentation_one.pptx" 
+        };
     }
 }
